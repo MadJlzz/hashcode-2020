@@ -1,0 +1,1 @@
+Simple repository containing our source for Google HashCode 2020.
