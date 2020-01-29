@@ -1,7 +1,34 @@
 package main
 
-import "fmt"
+import (
+	"flag"
+	"fmt"
+	"github.com/madjlzz/hashcode-2020/solver"
+)
+
+var (
+	filename  = flag.String("filename", "test/a_example.in", "the data file used for our algorithm")
+	algorithm = flag.String("solver", "", "the solver to use when trying to resolve the problem")
+)
 
 func main() {
-	fmt.Println("Entry point! So much thing to do!")
+	flag.Parse()
+
+	// 1. Reading input from file.
+	data := solver.ReadInput(*filename)
+
+	// 2. Transforming our data in a user friendly format.
+
+	// 3. Retrieving the right solver and run the algorithm.
+	var s solver.Solver
+	switch *algorithm {
+	default:
+		s = &solver.EmptySolver{}
+	}
+
+	sol := s.Solve(data)
+
+	// 4. Write that solution in a file.
+
+	fmt.Printf("A solution has been found! %v\n", sol)
 }
