@@ -11,7 +11,7 @@ import (
 type Noder interface {
 	GetId() int
 	GetNeighbours() []Noder
-	GetDistance(neighbourId int) float64
+	GetDistance(neighbour Noder) float64
 	SetFScore(score float64)
 	GetFScore() float64
 
@@ -47,7 +47,8 @@ func getPath(cameFrom map[int]Noder, goal Noder) []Noder {
 }
 
 // AStar algo as described in https://en.wikipedia.org/wiki/A*_search_algorithm
-func AStar(start Noder, goal Noder, distance HeuristicDistance) ([]Noder, error) {
+// staticWeight is used to increase algo speed at the expense of reliability -> 1.0 for perfect path, > 1.0 for less exact path but quicker result
+func AStar(start Noder, goal Noder, distance HeuristicDistance, staticWeight float64) ([]Noder, error) {
 	// Use of a map to efficiently retrieve an item
 	openSet := map[int]Noder{start.GetId(): start}
 
@@ -59,7 +60,7 @@ func AStar(start Noder, goal Noder, distance HeuristicDistance) ([]Noder, error)
 	cameFrom := make(map[int]Noder)
 
 	gScore := scoreMap{start.GetId(): 0}
-	start.SetFScore(distance(start, goal))
+	start.SetFScore(staticWeight * distance(start, goal))
 
 	for len(openSet) > 0 {
 		currentNode := heap.Pop(openSetHeap).(Noder)
@@ -70,11 +71,11 @@ func AStar(start Noder, goal Noder, distance HeuristicDistance) ([]Noder, error)
 		delete(openSet, currentNode.GetId())
 		currentGScore := gScore.get(currentNode.GetId())
 		for _, neighbour := range currentNode.GetNeighbours() {
-			tentativeGScore := currentGScore + currentNode.GetDistance(neighbour.GetId())
+			tentativeGScore := currentGScore + currentNode.GetDistance(neighbour)
 			if tentativeGScore < gScore.get(neighbour.GetId()) {
 				cameFrom[neighbour.GetId()] = currentNode
 				gScore[neighbour.GetId()] = tentativeGScore
-				neighbour.SetFScore(tentativeGScore + distance(neighbour, goal))
+				neighbour.SetFScore(tentativeGScore + staticWeight*distance(neighbour, goal))
 
 				if _, ok := openSet[neighbour.GetId()]; !ok {
 					openSet[neighbour.GetId()] = neighbour

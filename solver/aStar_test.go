@@ -12,8 +12,6 @@ import (
 // Node can be linked to any direct neighbour (even diagonal)
 // Distance is calculated using sqrt((x1-x2)² + (y1-y2)²)
 
-var allNodes = make(map[int]*testNode)
-
 func euclidianDist(na, nb Noder) float64 {
 	a := na.(*testNode)
 	b := nb.(*testNode)
@@ -26,20 +24,17 @@ type testNode struct {
 	neighbours    []Noder
 }
 
-func (t *testNode) GetId() int             { return t.id }
-func (t *testNode) GetNeighbours() []Noder { return t.neighbours }
-func (t *testNode) GetDistance(neighbourId int) float64 {
-	return euclidianDist(t, allNodes[neighbourId])
-}
-func (t *testNode) SetFScore(score float64)         { t.fScore = score }
-func (t *testNode) GetFScore() float64              { return t.fScore }
-func (t *testNode) Compare(heaper BasicHeaper) bool { return t.fScore < heaper.(*testNode).fScore }
-func (t *testNode) SetHeapIndex(index int)          { t.heapIndex = index }
-func (t *testNode) GetHeapIndex() int               { return t.heapIndex }
+func (t *testNode) GetId() int                          { return t.id }
+func (t *testNode) GetNeighbours() []Noder              { return t.neighbours }
+func (t *testNode) GetDistance(neighbour Noder) float64 { return euclidianDist(t, neighbour) }
+func (t *testNode) SetFScore(score float64)             { t.fScore = score }
+func (t *testNode) GetFScore() float64                  { return t.fScore }
+func (t *testNode) Compare(heaper BasicHeaper) bool     { return t.fScore < heaper.(*testNode).fScore }
+func (t *testNode) SetHeapIndex(index int)              { t.heapIndex = index }
+func (t *testNode) GetHeapIndex() int                   { return t.heapIndex }
 
 func newNode(id int, x, y float64) *testNode {
 	node := &testNode{id: id, x: x, y: y}
-	allNodes[id] = node
 	return node
 }
 
@@ -56,7 +51,7 @@ var n3_3 = newNode(33, 3.0, 3.0)
 func TestAStar_0(t *testing.T) {
 	n1_1.neighbours = []Noder{n1_2, n2_1, n2_2}
 
-	res, err := AStar(n1_1, n1_1, euclidianDist)
+	res, err := AStar(n1_1, n1_1, euclidianDist, 1.0)
 	Assert(t, nil, err)
 	Assert(t, 1, len(res))
 	Assert(t, 11, res[0].GetId())
@@ -88,7 +83,7 @@ func TestAStar_1(t *testing.T) {
 	n3_2.neighbours = []Noder{n3_1, n3_3, n2_3, n2_2, n2_1}
 	n3_3.neighbours = []Noder{n3_2, n2_3, n2_2}
 
-	res, err := AStar(n1_1, n3_3, euclidianDist)
+	res, err := AStar(n1_1, n3_3, euclidianDist, 1.0)
 	Assert(t, nil, err)
 	Assert(t, 3, len(res))
 	Assert(t, 11, res[0].GetId())
@@ -116,7 +111,7 @@ func TestAStar_2(t *testing.T) {
 	n3_2.neighbours = []Noder{n3_1, n3_3, n2_3, n2_2, n2_1}
 	n3_3.neighbours = []Noder{n3_2, n2_3}
 
-	res, err := AStar(n1_1, n3_3, euclidianDist)
+	res, err := AStar(n1_1, n3_3, euclidianDist, 1.0)
 	Assert(t, nil, err)
 	Assert(t, 4, len(res))
 	Assert(t, 11, res[0].GetId())
@@ -145,7 +140,7 @@ func TestAStar_3(t *testing.T) {
 	n3_2.neighbours = []Noder{n3_3}
 	n3_3.neighbours = []Noder{n3_2, n2_3}
 
-	res, err := AStar(n1_1, n3_3, euclidianDist)
+	res, err := AStar(n1_1, n3_3, euclidianDist, 1.0)
 	Assert(t, nil, err)
 	Assert(t, 5, len(res))
 	Assert(t, 11, res[0].GetId())
@@ -174,7 +169,7 @@ func TestAStar_4(t *testing.T) {
 	n3_2.neighbours = []Noder{n3_1, n2_3, n2_2, n2_1}
 	n3_3.neighbours = []Noder{}
 
-	res, err := AStar(n1_1, n3_3, euclidianDist)
+	res, err := AStar(n1_1, n3_3, euclidianDist, 1.0)
 	Assert(t, "could not reach the goal", fmt.Sprintf("%v", err))
 	Assert(t, 0, len(res))
 }
