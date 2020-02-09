@@ -35,8 +35,8 @@ func ComputeFile(file string) {
 
 	best := bestFinished
 	if len(solutionsTree) > 0 {
-		bestInTree := solutionsTree.Pop()
-		if bestInTree != nil && bestInTree.(*Proposition) != nil && bestInTree.(*Proposition).score > best.score {
+		bestInTree := heap.Pop(&solutionsTree)
+		if bestInTree != nil && bestInTree.(*Proposition) != nil && (best == nil || bestInTree.(*Proposition).score > best.score) {
 			best = bestInTree.(*Proposition)
 		}
 	}
@@ -50,6 +50,7 @@ func launchBatch(channel chan<- bool) {
 
 	var res *Proposition
 	for i := 0; res == nil && len(solutionsTree) > 0; i++ {
+		fmt.Printf("%d\n", i)
 		//fmt.Printf("Best score at turn %d: %v  -- %v\n", i, solutionsTree[0], bestFinished)
 		res = newIteration()
 	}

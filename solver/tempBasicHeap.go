@@ -1,5 +1,7 @@
 package solver
 
+import "fmt"
+
 // NEED TO BE IMPLEMENTED WITH POINTER
 // ex: func (s *MyHeap) Compare(heaper BasicHeaper) {...}
 type BasicHeaper interface {
@@ -15,9 +17,21 @@ type BasicHeaper interface {
 
 type BasicHeap []BasicHeaper
 
-func (h BasicHeap) Len() int           { return len(h) }
-func (h BasicHeap) Less(i, j int) bool { return h[i].Compare(h[j]) }
+func (h BasicHeap) Len() int { return len(h) }
+func (h BasicHeap) Less(i, j int) bool {
+	n := len(h)
+	if i >= n || j >= n {
+		fmt.Printf("Swap error: %d / %d / %d", n, i, j)
+		return false
+	}
+	return h[i].Compare(h[j])
+}
 func (h BasicHeap) Swap(i, j int) {
+	n := len(h)
+	if i >= n || j >= n {
+		fmt.Printf("Swap error: %d / %d / %d", n, i, j)
+		return
+	}
 	h[i], h[j] = h[j], h[i]
 	h[i].SetHeapIndex(i)
 	h[j].SetHeapIndex(j)
