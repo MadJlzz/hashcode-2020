@@ -23,6 +23,7 @@ func ComputeFile(file string) {
 	data = parseFile(file)
 	//fmt.Printf("%v %v\n", max, data)
 
+	quit := solver.WatchHeapOps()
 	channel := make(chan bool)
 	go launchBatch(channel)
 
@@ -41,7 +42,8 @@ func ComputeFile(file string) {
 		}
 	}
 
-	fmt.Printf("%v\n", best)
+	fmt.Printf("score=%v length=%d res=%v\n", best.score, len(best.pizzas), best.pizzas)
+	quit <- true
 }
 
 func launchBatch(channel chan<- bool) {
@@ -50,7 +52,6 @@ func launchBatch(channel chan<- bool) {
 
 	var res *Proposition
 	for i := 0; res == nil && len(solutionsTree) > 0; i++ {
-		fmt.Printf("%d\n", i)
 		//fmt.Printf("Best score at turn %d: %v  -- %v\n", i, solutionsTree[0], bestFinished)
 		res = newIteration()
 	}
@@ -88,6 +89,8 @@ func New(pizzas []int, parentSwapFrom int, baseScore int64) *Proposition {
 	return proposition
 }
 
+// Get best proposition from heap, create N children from it by making small modification to its solution
+// Fullfill its children in a batch execution. Stop all if one of the child has the max score
 func newIteration() *Proposition {
 	bestProp := heap.Pop(&solutionsTree).(*Proposition)
 	if bestProp.score == max {
@@ -100,12 +103,8 @@ func newIteration() *Proposition {
 	} else if bestFinished == nil || bestProp.score > bestFinished.score {
 		bestFinished = bestProp
 	}
-
 	res := solver.BatchExecution(children, FinalizeProposition, 100000)
 	for _, v := range res {
-		if v.Res == nil {
-			continue
-		}
 		child := v.Res.(*Proposition)
 		if child == nil {
 			continue
@@ -117,10 +116,9 @@ func newIteration() *Proposition {
 	return nil
 }
 
+// Most costly part of the algo and thus put in thread
+// Fill remaining pizzas until max value is reached, and push to heap
 func FinalizeProposition(p interface{}) solver.ExecutionRes {
-	if p == nil {
-		return solver.ExecutionRes{nil, nil}
-	}
 	proposition := p.(*Proposition)
 	if proposition == nil {
 		return solver.ExecutionRes{nil, nil}
@@ -128,7 +126,12 @@ func FinalizeProposition(p interface{}) solver.ExecutionRes {
 	proposition.FullFill()
 	proposition.lastElement = proposition.pizzas[len(proposition.pizzas)-1]
 	proposition.lastSwapTo = proposition.lastElement
-	heap.Push(&solutionsTree, proposition)
+	channel := solver.HeapPushWithFeedback(&solutionsTree, proposition)
+
+	// below is a hack used to force waiting for the end of the push to release the thread
+	select {
+	case <-channel:
+	}
 	return solver.ExecutionRes{proposition, nil}
 }
 
@@ -157,6 +160,7 @@ func NewChild(p *Proposition) (*Proposition, error) {
 	return New(swapPizzas(p), p.lastSwapFrom, p.score-data[p.pizzas[p.lastSwapFrom]]+data[p.lastSwapTo]), nil
 }
 
+// Remove item at index lastSwapFrom and add item at the end with value lastSwapTo
 func swapPizzas(p *Proposition) []int {
 	newPizzas := make([]int, len(p.pizzas))
 	copy(newPizzas[:p.lastSwapFrom], p.pizzas[:p.lastSwapFrom])
@@ -165,6 +169,7 @@ func swapPizzas(p *Proposition) []int {
 	return newPizzas
 }
 
+// Create n children from current proposition
 func (p *Proposition) createChildren() []interface{} {
 	res := make([]interface{}, maxChildrenPerLoop)
 	var err error
