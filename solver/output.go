@@ -15,6 +15,35 @@ type Serializable interface {
 	String() string
 }
 
+type myString struct {
+	o string
+}
+
+func (s myString) String() string { return s.o }
+
+func DumpStringMapToFile(filename string, outputMap *map[int][]string) {
+	var output [][]Serializable
+	var maxLine int
+
+	for n := range *outputMap {
+		if n > maxLine {
+			maxLine = n
+		}
+	}
+
+	for i := 0; i <= maxLine; i++ {
+		line, exist := (*outputMap)[i]
+		newLine := []Serializable{}
+		if exist {
+			for j := 0; j < len(line); j++ {
+				newLine = append(newLine, myString{line[j]})
+			}
+		}
+		output = append(output, newLine)
+	}
+	DumpToFile(filename, &output)
+}
+
 func DumpToFile(filename string, output *[][]Serializable) {
 	f, err := os.Create(filename)
 	if err != nil {
@@ -36,7 +65,6 @@ func DumpToFile(filename string, output *[][]Serializable) {
 			write(w, item.String())
 		}
 	}
-
 }
 
 func write(w *bufio.Writer, s string) {

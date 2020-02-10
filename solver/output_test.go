@@ -30,6 +30,19 @@ func TestDumpToFile(t *testing.T) {
 	compare(t, &someItem, "output_filled.txt", "../test/output_filled.txt")
 }
 
+func TestDumpMapToFile(t *testing.T) {
+	someItem := make(map[int][]string)
+	someItem[0] = []string{"a=1-b=a", "a=2-b=b"}
+	someItem[2] = []string{"a=3-b=c"}
+	compareWithMap(t, &someItem, "output_filled.txt", "../test/output_filled2.txt")
+}
+
+func compareWithMap(t *testing.T, input *map[int][]string, resFilePath string, expectedFilePath string) {
+	DumpStringMapToFile(resFilePath, input)
+	deepCompare(t, expectedFilePath, resFilePath)
+	os.Remove(resFilePath)
+}
+
 func compare(t *testing.T, input *[][]Serializable, resFilePath string, expectedFilePath string) {
 	DumpToFile(resFilePath, input)
 	deepCompare(t, expectedFilePath, resFilePath)
