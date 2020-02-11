@@ -22,6 +22,26 @@ type BatchRes struct {
 	ExecutionRes
 }
 
+// provide an easier to use batch execution interface. In case of error (technical or timeout), item will be null -> must be anticipated by the user
+func BatchExecutionBasic(data []interface{}, execute func(interface{}) interface{}, timeout time.Duration) []interface{} {
+	tempFunc := func(i interface{}) ExecutionRes {
+		return ExecutionRes{execute(i), nil}
+	}
+
+	resRaw := BatchExecution(data, tempFunc, timeout)
+
+	res := make([]interface{}, len(resRaw))
+	for i, v := range resRaw {
+		if v.Err != nil {
+			res[i] = nil
+		} else {
+			res[i] = v.Res
+		}
+	}
+
+	return res
+}
+
 func BatchExecution(data []interface{}, execute func(interface{}) ExecutionRes, timeout time.Duration) []*BatchRes {
 	if timeout == 0 {
 		// 0 means no timeout -> artificially set sufficiently large one -> 1h

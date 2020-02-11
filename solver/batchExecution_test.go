@@ -85,3 +85,25 @@ func check(t *testing.T, want interface{}, got interface{}) {
 		t.Errorf("Error: expected %v - got %v", want, got)
 	}
 }
+
+func batchExecuteSimple(d interface{}) interface{} {
+	val := d.(*DataTest)
+	switch val.val {
+	case 2:
+		return nil
+	default:
+		val.val *= 2
+		return val
+	}
+}
+
+func TestBatchExecutionBasic(t *testing.T) {
+	data := []interface{}{&DataTest{1}, &DataTest{2}, &DataTest{3}, &DataTest{4}, &DataTest{5}}
+	res := BatchExecutionBasic(data, batchExecuteSimple, 100) // test should work if your computer is not from the 90s
+	check(t, 5, len(res))
+	check(t, 2, res[0].(*DataTest).val)
+	check(t, nil, res[1])
+	check(t, 6, res[2].(*DataTest).val)
+	check(t, 8, res[3].(*DataTest).val)
+	check(t, 10, res[4].(*DataTest).val)
+}

@@ -20,6 +20,8 @@ var solutionsTree solver.BasicHeap
 var bestFinished *Proposition
 
 func ComputeFile(file string) {
+	start := time.Now()
+
 	data = parseFile(file)
 	//fmt.Printf("%v %v\n", max, data)
 
@@ -29,7 +31,7 @@ func ComputeFile(file string) {
 
 	select {
 	case <-channel:
-		fmt.Println("All possibilities were explored: this should be the best solution")
+		fmt.Println("Jackpot: Best solution found !")
 	case <-time.After(10000 * time.Millisecond):
 		fmt.Println("Timedout...")
 	}
@@ -43,6 +45,8 @@ func ComputeFile(file string) {
 	}
 
 	fmt.Printf("score=%v length=%d res=%v\n", best.score, len(best.pizzas), best.pizzas)
+
+	fmt.Printf("Took %s", time.Since(start))
 	quit <- true
 }
 
@@ -103,13 +107,15 @@ func newIteration() *Proposition {
 	} else if bestFinished == nil || bestProp.score > bestFinished.score {
 		bestFinished = bestProp
 	}
-	res := solver.BatchExecution(children, FinalizeProposition, 100000)
+
+	res := solver.BatchExecutionBasic(children, FinalizeProposition, 100000)
+
 	for _, v := range res {
-		child := v.Res.(*Proposition)
-		if child == nil {
+		child := v.(*Proposition)
+		switch {
+		case child == nil:
 			continue
-		}
-		if child.score == max {
+		case child.score == max:
 			return child
 		}
 	}
@@ -118,10 +124,11 @@ func newIteration() *Proposition {
 
 // Most costly part of the algo and thus put in thread
 // Fill remaining pizzas until max value is reached, and push to heap
-func FinalizeProposition(p interface{}) solver.ExecutionRes {
+func FinalizeProposition(p interface{}) interface{} {
+	var emptyRes *Proposition
 	proposition := p.(*Proposition)
 	if proposition == nil {
-		return solver.ExecutionRes{nil, nil}
+		return emptyRes
 	}
 	proposition.FullFill()
 	proposition.lastElement = proposition.pizzas[len(proposition.pizzas)-1]
@@ -132,32 +139,43 @@ func FinalizeProposition(p interface{}) solver.ExecutionRes {
 	select {
 	case <-channel:
 	}
-	return solver.ExecutionRes{proposition, nil}
+	return proposition
 }
 
 // This method is used to generate a new proposition from an existing one
 // As of now it is very basic meaning bad perfs
 // -> given a proposition, a new one will be attempted by switching one of the highest number of parts with the next lowest one
 // -> ex  pizzas possible 10 8 6 3 1 / current set [10 6 3] -> 'replace' pizza 6 by 1 -> new set [10 3 1]
-func NewChild(p *Proposition) (*Proposition, error) {
+func NewChild(i interface{}) interface{} {
+	p := i.(*Proposition)
+	var emptyRes *Proposition
+	if !p.canHaveMoreChild {
+		return emptyRes
+	}
+
 	if p.lastElement >= sizeMinus1 {
 		p.canHaveMoreChild = false
-		return nil, fmt.Errorf("last element reached, no more child possible")
+		return emptyRes
 	}
 
 	p.lastSwapTo++
 	if p.lastSwapTo < size {
-		return New(swapPizzas(p), p.lastSwapFrom, p.score-data[p.pizzas[p.lastSwapFrom]]+data[p.lastSwapTo]), nil
+		return New(swapPizzas(p), p.lastSwapFrom, p.getNewBaseScore())
 	}
 
 	p.lastSwapFrom++
 	if p.lastSwapFrom >= len(p.pizzas) {
 		p.canHaveMoreChild = false
-		return nil, fmt.Errorf("last element reached, no more child possible")
+		return emptyRes
 	}
 
 	p.lastSwapTo = p.lastElement + 1
-	return New(swapPizzas(p), p.lastSwapFrom, p.score-data[p.pizzas[p.lastSwapFrom]]+data[p.lastSwapTo]), nil
+	return New(swapPizzas(p), p.lastSwapFrom, p.getNewBaseScore())
+}
+
+// to get new base score for child, take current, subtract the value of the removed pizza and add the value of the new one
+func (p *Proposition) getNewBaseScore() int64 {
+	return p.score - data[p.pizzas[p.lastSwapFrom]] + data[p.lastSwapTo]
 }
 
 // Remove item at index lastSwapFrom and add item at the end with value lastSwapTo
@@ -172,12 +190,8 @@ func swapPizzas(p *Proposition) []int {
 // Create n children from current proposition
 func (p *Proposition) createChildren() []interface{} {
 	res := make([]interface{}, maxChildrenPerLoop)
-	var err error
 	for i := 0; i < maxChildrenPerLoop; i++ {
-		res[i], err = NewChild(p)
-		if err != nil {
-			break
-		}
+		res[i] = NewChild(p)
 	}
 	return res
 }
