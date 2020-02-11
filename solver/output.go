@@ -44,6 +44,17 @@ func DumpStringMapToFile(filename string, outputMap *map[int][]string) {
 	DumpToFile(filename, &output)
 }
 
+func DumpStringListToFile(filename string, outputList *[][]string) {
+	output := make([][]Serializable, len(*outputList))
+	for i, v := range *outputList {
+		output[i] = make([]Serializable, len(v))
+		for j, w := range v {
+			output[i][j] = myString{w}
+		}
+	}
+	DumpToFile(filename, &output)
+}
+
 func DumpToFile(filename string, output *[][]Serializable) {
 	f, err := os.Create(filename)
 	if err != nil {
