@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	inputEndOfLine = '\n'
-	inputDelimiter = " "
+	InputEndOfLine = '\n'
+	InputDelimiter = " "
 )
 
 func ReadInput(filename string) map[int][]string {
@@ -23,11 +23,11 @@ func ReadInput(filename string) map[int][]string {
 
 	r := bufio.NewReader(f)
 	for i := 0; ; i++ {
-		l, err := r.ReadString(inputEndOfLine)
+		l, err := r.ReadString(InputEndOfLine)
 		if err == io.EOF {
 			break
 		}
-		res[i] = strings.Split(l, inputDelimiter)
+		res[i] = strings.Split(l, InputDelimiter)
 	}
 
 	return res
