@@ -89,7 +89,7 @@ func (p *Proposition) SetHeapIndex(index int) { p.heapIndex = index }
 func (p *Proposition) GetHeapIndex() int      { return p.heapIndex }
 
 func New(pizzas []int, parentSwapFrom int, baseScore int64) *Proposition {
-	proposition := &Proposition{pizzas, 0, baseScore, 0, parentSwapFrom, 0, true}
+	proposition := &Proposition{pizzas, 0, baseScore, 0, parentSwapFrom, parentSwapFrom + 1, true}
 	return proposition
 }
 
@@ -132,7 +132,6 @@ func FinalizeProposition(p interface{}) interface{} {
 	}
 	proposition.FullFill()
 	proposition.lastElement = proposition.pizzas[len(proposition.pizzas)-1]
-	proposition.lastSwapTo = proposition.lastElement
 	channel := solver.HeapPushWithFeedback(&solutionsTree, proposition)
 
 	// below is a hack used to force waiting for the end of the push to release the thread
@@ -153,29 +152,33 @@ func NewChild(i interface{}) interface{} {
 		return emptyRes
 	}
 
-	if p.lastElement >= sizeMinus1 {
-		p.canHaveMoreChild = false
+	if p.lastSwapFrom >= sizeMinus1 {
 		return emptyRes
 	}
 
-	p.lastSwapTo++
-	if p.lastSwapTo < size {
-		return New(swapPizzas(p), p.lastSwapFrom, p.getNewBaseScore())
+	if p.lastSwapTo >= sizeMinus1 {
+		p.lastSwapFrom++
+		p.lastSwapTo = p.lastSwapFrom + 1
+		return NewChild(p)
 	}
 
-	p.lastSwapFrom++
-	if p.lastSwapFrom >= len(p.pizzas) {
-		p.canHaveMoreChild = false
-		return emptyRes
+	newScore := p.score - data[p.pizzas[p.lastSwapFrom]]
+	for p.lastSwapTo <= sizeMinus1 {
+		if Contains(p.pizzas, p.lastSwapTo) {
+			continue
+		}
+		temp := newScore + data[p.pizzas[p.lastSwapTo]]
+		p.lastSwapTo++
+		if temp <= max {
+			return New(swapPizzas(p), p.lastSwapFrom, temp)
+		}
 	}
-
-	p.lastSwapTo = p.lastElement + 1
-	return New(swapPizzas(p), p.lastSwapFrom, p.getNewBaseScore())
+	return NewChild(p)
 }
 
 // to get new base score for child, take current, subtract the value of the removed pizza and add the value of the new one
 func (p *Proposition) getNewBaseScore() int64 {
-	return p.score - data[p.pizzas[p.lastSwapFrom]] + data[p.lastSwapTo]
+	return p.score - data[p.pizzas[p.lastSwapFrom]] + data[p.pizzas[p.lastSwapTo]]
 }
 
 // Remove item at index lastSwapFrom and add item at the end with value lastSwapTo
@@ -202,13 +205,16 @@ func (p *Proposition) FullFill() { // -> might be the most costly part of the al
 	if len(p.pizzas) == 0 {
 		start = 0
 	} else {
-		start = p.pizzas[len(p.pizzas)-1] + 1
+		start = p.pizzas[p.lastSwapFrom] + 1
 	}
 
 	for i := start; i < size; i++ {
+		if Contains(p.pizzas, i) {
+			continue
+		}
 		temp := p.score + data[i]
 		if temp > max {
-			break
+			continue
 		} else {
 			p.pizzas = append(p.pizzas, i)
 			p.score = temp
@@ -226,4 +232,13 @@ func parseFile(file string) []int64 {
 	}
 	max, _ = strconv.ParseInt(content[0][0], 10, 64)
 	return res
+}
+
+func Contains(a []int, x int) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
 }
