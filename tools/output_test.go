@@ -20,6 +20,52 @@ func (d dummy) String() string {
 	return fmt.Sprintf("a=%d-b=%s", d.a, d.b)
 }
 
+func Check(t *testing.T, want interface{}, got interface{}) {
+	if want != got {
+		t.Errorf("Error: expected %v - got %v", want, got)
+	}
+}
+
+func CheckExist(t *testing.T, path string, exist bool) {
+	found := false
+	if _, err := os.Stat(path); os.IsExist(err) {
+		found = true
+	}
+	if (exist && !found) || (!exist && found) {
+		t.Errorf("%s unexpected result -> should exist=%v", path, exist)
+	}
+}
+
+func TestGetOutputDir(t *testing.T) {
+	dummy := GetOutputDir(true, "test")
+	Check(t, "dummy", dummy)
+
+	path1 := GetOutputDir(false, "test")
+	Check(t, "test/1", path1)
+
+	path2 := GetOutputDir(false, "test")
+	Check(t, "test/2", path2)
+
+	_ = os.Remove(path1)
+	_ = os.Remove(path2)
+}
+
+func TestGetTestFiles(t *testing.T) {
+	_ = os.Mkdir("abc", os.ModeDir)
+	f1, _ := os.Create("abc/test1.txt")
+	f2, _ := os.Create("abc/test2.txt")
+	f3, _ := os.Create("abc/test3.txt")
+	_ = f1.Close()
+	_ = f2.Close()
+	_ = f3.Close()
+	files := GetTestFiles("abc")
+	Check(t, 3, len(files))
+	Check(t, "abc/test1.txt", files[0])
+	Check(t, "abc/test2.txt", files[1])
+	Check(t, "abc/test3.txt", files[2])
+	_ = os.RemoveAll("abc/")
+}
+
 func TestEmptyDumpToFile(t *testing.T) {
 	empty := make([][]Serializable, 0)
 	compare(t, &empty, "output_empty.txt", "test/output_empty.txt")

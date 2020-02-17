@@ -2,8 +2,11 @@ package tools
 
 import (
 	"bufio"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 )
 
 const (
@@ -14,12 +17,60 @@ const (
 type Serializable interface {
 	String() string
 }
-
 type myString struct {
 	o string
 }
 
 func (s myString) String() string { return s.o }
+
+func GetOutputDir(skipOutput bool, resBasePath string) string {
+	if skipOutput {
+		return "dummy"
+	}
+
+	if _, err := os.Stat(resBasePath); os.IsNotExist(err) {
+		_ = os.Mkdir(resBasePath, os.ModeDir)
+	}
+
+	files, err := ioutil.ReadDir(resBasePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	maxVersion := 0
+	for _, file := range files {
+		if !file.IsDir() {
+			continue
+		}
+		version, err := strconv.Atoi(file.Name())
+		if err != nil {
+			continue
+		}
+
+		if version > maxVersion {
+			maxVersion = version
+		}
+	}
+
+	res := fmt.Sprintf("%s/%d", resBasePath, maxVersion+1)
+	_ = os.Mkdir(res, os.ModeDir)
+	return res
+}
+
+func GetTestFiles(testDataFolder string) (res []string) {
+	files, err := ioutil.ReadDir(testDataFolder)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		res = append(res, fmt.Sprintf("%s/%s", testDataFolder, file.Name()))
+	}
+	return res
+}
 
 func DumpStringMapToFile(filename string, outputMap *map[int][]string) {
 	var output [][]Serializable

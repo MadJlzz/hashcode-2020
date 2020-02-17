@@ -56,7 +56,7 @@ func SolveExercise(fileContent map[int][]string) (res [][]string) {
 	res = append(res, []string{fmt.Sprintf("%d", len(best.pizzas))})
 	res = append(res, make([]string, len(best.pizzas)))
 	for i := 0; i < len(best.pizzas); i++ {
-		res[1][i] = fmt.Sprintf("%d", pizzaRes)
+		res[1][i] = fmt.Sprintf("%d", pizzaRes[i])
 	}
 	return res
 }
