@@ -4,6 +4,7 @@ import (
 	"container/heap"
 	"fmt"
 	"github.com/madjlzz/hashcode-2020/solver"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -44,10 +45,20 @@ func ComputeFile(file string) {
 		}
 	}
 
-	fmt.Printf("score=%v length=%d res=%v\n", best.score, len(best.pizzas), best.pizzas)
+	fmt.Printf("score=%v length=%d res=%v\n", best.score, len(best.pizzas), reorder(best))
 
 	fmt.Printf("Took %s", time.Since(start))
 	quit <- true
+}
+
+func reorder(p *Proposition) []int {
+	var s = len(data) - 1
+	res := make([]int, len(p.pizzas))
+	for i := 0; i < len(p.pizzas); i++ {
+		res[i] = s - p.pizzas[i]
+	}
+	sort.Ints(res)
+	return res
 }
 
 func launchBatch(channel chan<- bool) {
@@ -108,17 +119,7 @@ func newIteration() *Proposition {
 		bestFinished = bestProp
 	}
 
-	res := solver.BatchExecutionBasic(children, FinalizeProposition, 100000000)
-
-	for _, v := range res {
-		child := v.(*Proposition)
-		switch {
-		case child == nil:
-			continue
-		case child.score == max:
-			return child
-		}
-	}
+	solver.BatchExecutionBasic(children, FinalizeProposition, 100000000)
 	return nil
 }
 
@@ -153,12 +154,14 @@ func NewChild(i interface{}) interface{} {
 	}
 
 	if p.lastSwapFrom >= len(p.pizzas) {
+		p.canHaveMoreChild = false
 		return emptyRes
 	}
 
 	if p.lastSwapTo >= sizeMinus1 {
 		p.lastSwapFrom++
 		if p.lastSwapFrom >= len(p.pizzas) {
+			p.canHaveMoreChild = false
 			return emptyRes
 		}
 
@@ -239,6 +242,7 @@ func parseFile(file string) []int64 {
 		res[i], _ = strconv.ParseInt(strings.TrimSpace(content[1][sizeMinus1-i]), 10, 64)
 	}
 	max, _ = strconv.ParseInt(content[0][0], 10, 64)
+
 	return res
 }
 
