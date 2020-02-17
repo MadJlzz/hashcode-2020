@@ -27,61 +27,83 @@ func TestBatchExecutionNominal(t *testing.T) {
 	data := []interface{}{DataTest{1}, DataTest{3}, DataTest{4}}
 	res := BatchExecution(data, execute, 0)
 	check(t, 3, len(res))
-	check(t, 0, res[0].id)
-	check(t, 1, res[1].id)
-	check(t, 2, res[2].id)
+	check(t, 0, res[0].Id)
+	check(t, 1, res[1].Id)
+	check(t, 2, res[2].Id)
 
-	check(t, 2, res[0].res)
-	check(t, 6, res[1].res)
-	check(t, 8, res[2].res)
+	check(t, 2, res[0].Res)
+	check(t, 6, res[1].Res)
+	check(t, 8, res[2].Res)
 
-	check(t, nil, res[0].err)
-	check(t, nil, res[1].err)
-	check(t, nil, res[2].err)
+	check(t, nil, res[0].Err)
+	check(t, nil, res[1].Err)
+	check(t, nil, res[2].Err)
 }
 
 func TestBatchExecutionError(t *testing.T) {
 	data := []interface{}{DataTest{1}, DataTest{2}, DataTest{3}}
 	res := BatchExecution(data, execute, 0)
 	check(t, 3, len(res))
-	check(t, 0, res[0].id)
-	check(t, 1, res[1].id)
-	check(t, 2, res[2].id)
+	check(t, 0, res[0].Id)
+	check(t, 1, res[1].Id)
+	check(t, 2, res[2].Id)
 
-	check(t, 2, res[0].res)
-	check(t, nil, res[1].res)
-	check(t, 6, res[2].res)
+	check(t, 2, res[0].Res)
+	check(t, nil, res[1].Res)
+	check(t, 6, res[2].Res)
 
-	check(t, nil, res[0].err)
-	check(t, "2 is special", fmt.Sprintf("%s", res[1].err))
-	check(t, nil, res[2].err)
+	check(t, nil, res[0].Err)
+	check(t, "2 is special", fmt.Sprintf("%s", res[1].Err))
+	check(t, nil, res[2].Err)
 }
 
 func TestBatchExecutionErrorWithTimeout(t *testing.T) {
 	data := []interface{}{DataTest{1}, DataTest{2}, DataTest{42}, DataTest{42}, DataTest{3}}
 	res := BatchExecution(data, execute, 100) // test should work if your computer is not from the 90s
 	check(t, 5, len(res))
-	check(t, 0, res[0].id)
-	check(t, 1, res[1].id)
-	check(t, 2, res[2].id)
-	check(t, 3, res[3].id)
-	check(t, 4, res[4].id)
+	check(t, 0, res[0].Id)
+	check(t, 1, res[1].Id)
+	check(t, 2, res[2].Id)
+	check(t, 3, res[3].Id)
+	check(t, 4, res[4].Id)
 
-	check(t, 2, res[0].res)
-	check(t, nil, res[1].res)
-	check(t, nil, res[2].res)
-	check(t, nil, res[3].res)
-	check(t, 6, res[4].res)
+	check(t, 2, res[0].Res)
+	check(t, nil, res[1].Res)
+	check(t, nil, res[2].Res)
+	check(t, nil, res[3].Res)
+	check(t, 6, res[4].Res)
 
-	check(t, nil, res[0].err)
-	check(t, "2 is special", fmt.Sprintf("%s", res[1].err))
-	check(t, "timeout reached", fmt.Sprintf("%s", res[2].err))
-	check(t, "timeout reached", fmt.Sprintf("%s", res[3].err))
-	check(t, nil, res[4].err)
+	check(t, nil, res[0].Err)
+	check(t, "2 is special", fmt.Sprintf("%s", res[1].Err))
+	check(t, "timeout reached", fmt.Sprintf("%s", res[2].Err))
+	check(t, "timeout reached", fmt.Sprintf("%s", res[3].Err))
+	check(t, nil, res[4].Err)
 }
 
 func check(t *testing.T, want interface{}, got interface{}) {
 	if want != got {
 		t.Errorf("Error: expected %v - got %v", want, got)
 	}
+}
+
+func batchExecuteSimple(d interface{}) interface{} {
+	val := d.(*DataTest)
+	switch val.val {
+	case 2:
+		return nil
+	default:
+		val.val *= 2
+		return val
+	}
+}
+
+func TestBatchExecutionBasic(t *testing.T) {
+	data := []interface{}{&DataTest{1}, &DataTest{2}, &DataTest{3}, &DataTest{4}, &DataTest{5}}
+	res := BatchExecutionBasic(data, batchExecuteSimple, 100) // test should work if your computer is not from the 90s
+	check(t, 5, len(res))
+	check(t, 2, res[0].(*DataTest).val)
+	check(t, nil, res[1])
+	check(t, 6, res[2].(*DataTest).val)
+	check(t, 8, res[3].(*DataTest).val)
+	check(t, 10, res[4].(*DataTest).val)
 }

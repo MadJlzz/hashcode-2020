@@ -22,8 +22,9 @@ type heapPopChanMsg struct {
 
 // heapPushChanMsg - the message structure for a push chan
 type heapPushChanMsg struct {
-	h heap.Interface
-	x interface{}
+	h        heap.Interface
+	x        interface{}
+	feedback chan<- bool
 }
 
 var (
@@ -40,6 +41,17 @@ func HeapPush(h heap.Interface, x interface{}) {
 		h: h,
 		x: x,
 	}
+}
+
+// HeapPush - safely push item to a heap interface
+func HeapPushWithFeedback(h heap.Interface, x interface{}) <-chan bool {
+	feedback := make(chan bool)
+	heapPushChan <- heapPushChanMsg{
+		h:        h,
+		x:        x,
+		feedback: feedback,
+	}
+	return feedback
 }
 
 // HeapPop - safely pop item from a heap interface
@@ -66,10 +78,13 @@ func WatchHeapOps() chan bool {
 			select {
 			case <-quit:
 				return
-			case popMsg := <-heapPopChan:
-				popMsg.result <- heap.Pop(popMsg.h)
 			case pushMsg := <-heapPushChan:
 				heap.Push(pushMsg.h, pushMsg.x)
+				if pushMsg.feedback != nil {
+					pushMsg.feedback <- true
+				}
+			case popMsg := <-heapPopChan:
+				popMsg.result <- heap.Pop(popMsg.h)
 			}
 		}
 	}()

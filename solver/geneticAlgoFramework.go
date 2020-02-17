@@ -96,7 +96,7 @@ func geneticAlgoExecutions(channel chan<- Celler, cellers []Celler, execute func
 	res := BatchExecution(toInterface(cellers), batchFunc, timeout/4)
 	var bestRes Celler
 	for _, v := range res {
-		temp := v.res.(Celler)
+		temp := v.Res.(Celler)
 		if bestRes == nil || bestRes.Score() < temp.Score() {
 			bestRes = temp
 		}
