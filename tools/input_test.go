@@ -1,4 +1,4 @@
-package solver
+package tools
 
 import "testing"
 

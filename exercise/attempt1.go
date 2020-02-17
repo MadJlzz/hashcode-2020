@@ -20,11 +20,13 @@ const maxChildrenPerLoop = 100
 var solutionsTree solver.BasicHeap
 var bestFinished *Proposition
 
-func ComputeFile(file string) {
+func SolveExercise(fileContent map[int][]string) (res [][]string) {
+	bestFinished = nil
+	solutionsTree = nil
+
 	start := time.Now()
 
-	data = parseFile(file)
-	//fmt.Printf("%v %v\n", max, data)
+	data = parseFile(fileContent)
 
 	quit := solver.WatchHeapOps()
 	channel := make(chan bool)
@@ -45,10 +47,18 @@ func ComputeFile(file string) {
 		}
 	}
 
-	fmt.Printf("score=%v length=%d res=%v\n", best.score, len(best.pizzas), reorder(best))
+	pizzaRes := reorder(best)
+	fmt.Printf("score=%v length=%d res=%v\n", best.score, len(best.pizzas), pizzaRes)
 
-	fmt.Printf("Took %s", time.Since(start))
+	fmt.Printf("Took %s\n", time.Since(start))
 	quit <- true
+
+	res = append(res, []string{fmt.Sprintf("%d", len(best.pizzas))})
+	res = append(res, make([]string, len(best.pizzas)))
+	for i := 0; i < len(best.pizzas); i++ {
+		res[1][i] = fmt.Sprintf("%d", pizzaRes)
+	}
+	return res
 }
 
 func reorder(p *Proposition) []int {
@@ -109,6 +119,7 @@ func New(pizzas []int, parentSwapFrom int, baseScore int64) *Proposition {
 func newIteration() *Proposition {
 	bestProp := heap.Pop(&solutionsTree).(*Proposition)
 	if bestProp.score == max {
+		bestFinished = bestProp
 		return bestProp
 	}
 
@@ -233,15 +244,14 @@ func (p *Proposition) FullFill() { // -> might be the most costly part of the al
 	}
 }
 
-func parseFile(file string) []int64 {
-	content := solver.ReadInput(file)
-	size, _ = strconv.Atoi(strings.TrimSpace(content[0][1]))
+func parseFile(fileContent map[int][]string) []int64 {
+	size, _ = strconv.Atoi(strings.TrimSpace(fileContent[0][1]))
 	res := make([]int64, size)
 	sizeMinus1 = size - 1
 	for i := 0; i < size; i++ {
-		res[i], _ = strconv.ParseInt(strings.TrimSpace(content[1][sizeMinus1-i]), 10, 64)
+		res[i], _ = strconv.ParseInt(strings.TrimSpace(fileContent[1][sizeMinus1-i]), 10, 64)
 	}
-	max, _ = strconv.ParseInt(content[0][0], 10, 64)
+	max, _ = strconv.ParseInt(fileContent[0][0], 10, 64)
 
 	return res
 }

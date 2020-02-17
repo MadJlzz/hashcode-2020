@@ -1,4 +1,4 @@
-package solver
+package tools
 
 import (
 	"bytes"
@@ -22,26 +22,26 @@ func (d dummy) String() string {
 
 func TestEmptyDumpToFile(t *testing.T) {
 	empty := make([][]Serializable, 0)
-	compare(t, &empty, "output_empty.txt", "../test/output_empty.txt")
+	compare(t, &empty, "output_empty.txt", "test/output_empty.txt")
 }
 
 func TestDumpToFile(t *testing.T) {
 	someItem := [][]Serializable{{dummy{1, "a"}, dummy{2, "b"}}, {dummy{3, "c"}}}
-	compare(t, &someItem, "output_filled.txt", "../test/output_filled.txt")
+	compare(t, &someItem, "output_filled.txt", "test/output_filled.txt")
 }
 
 func TestDumpMapToFile(t *testing.T) {
 	someItem := make(map[int][]string)
 	someItem[0] = []string{"a=1-b=a", "a=2-b=b"}
 	someItem[2] = []string{"a=3-b=c"}
-	compareWithMap(t, &someItem, "output_filled.txt", "../test/output_filled2.txt")
+	compareWithMap(t, &someItem, "output_filled.txt", "test/output_filled2.txt")
 }
 
 func TestDumpListToFile(t *testing.T) {
 	someItem := make([][]string, 3)
 	someItem[0] = []string{"a=1-b=a", "a=2-b=b"}
 	someItem[2] = []string{"a=3-b=c"}
-	compareWithList(t, &someItem, "output_filled.txt", "../test/output_filled2.txt")
+	compareWithList(t, &someItem, "output_filled.txt", "test/output_filled2.txt")
 }
 
 func compareWithMap(t *testing.T, input *map[int][]string, resFilePath string, expectedFilePath string) {
