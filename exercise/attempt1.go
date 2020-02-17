@@ -32,7 +32,7 @@ func ComputeFile(file string) {
 	select {
 	case <-channel:
 		fmt.Println("Jackpot: Best solution found !")
-	case <-time.After(10000 * time.Millisecond):
+	case <-time.After(100000000 * time.Millisecond):
 		fmt.Println("Timedout...")
 	}
 
@@ -51,7 +51,7 @@ func ComputeFile(file string) {
 }
 
 func launchBatch(channel chan<- bool) {
-	start := New([]int{}, 0, 0)
+	start := &Proposition{[]int{}, 0, 0, 0, 0, 1, true}
 	FinalizeProposition(start)
 
 	var res *Proposition
@@ -89,7 +89,7 @@ func (p *Proposition) SetHeapIndex(index int) { p.heapIndex = index }
 func (p *Proposition) GetHeapIndex() int      { return p.heapIndex }
 
 func New(pizzas []int, parentSwapFrom int, baseScore int64) *Proposition {
-	proposition := &Proposition{pizzas, 0, baseScore, 0, parentSwapFrom, parentSwapFrom + 1, true}
+	proposition := &Proposition{pizzas, 0, baseScore, 0, parentSwapFrom, pizzas[parentSwapFrom] + 1, true}
 	return proposition
 }
 
@@ -108,7 +108,7 @@ func newIteration() *Proposition {
 		bestFinished = bestProp
 	}
 
-	res := solver.BatchExecutionBasic(children, FinalizeProposition, 100000)
+	res := solver.BatchExecutionBasic(children, FinalizeProposition, 100000000)
 
 	for _, v := range res {
 		child := v.(*Proposition)
@@ -152,26 +152,34 @@ func NewChild(i interface{}) interface{} {
 		return emptyRes
 	}
 
-	if p.lastSwapFrom >= sizeMinus1 {
+	if p.lastSwapFrom >= len(p.pizzas) {
 		return emptyRes
 	}
 
 	if p.lastSwapTo >= sizeMinus1 {
 		p.lastSwapFrom++
-		p.lastSwapTo = p.lastSwapFrom + 1
+		if p.lastSwapFrom >= len(p.pizzas) {
+			return emptyRes
+		}
+
+		p.lastSwapTo = p.pizzas[p.lastSwapFrom] + 1
 		return NewChild(p)
 	}
 
 	newScore := p.score - data[p.pizzas[p.lastSwapFrom]]
 	for p.lastSwapTo <= sizeMinus1 {
 		if Contains(p.pizzas, p.lastSwapTo) {
+			p.lastSwapTo++
 			continue
 		}
-		temp := newScore + data[p.pizzas[p.lastSwapTo]]
-		p.lastSwapTo++
+
+		temp := newScore + data[p.lastSwapTo]
 		if temp <= max {
-			return New(swapPizzas(p), p.lastSwapFrom, temp)
+			res := New(swapPizzas(p), p.lastSwapFrom, temp)
+			p.lastSwapTo++
+			return res
 		}
+		p.lastSwapTo++
 	}
 	return NewChild(p)
 }
