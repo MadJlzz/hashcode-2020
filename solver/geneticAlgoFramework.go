@@ -2,6 +2,8 @@ package solver
 
 import (
 	"fmt"
+	"gonum.org/v1/gonum/stat/distuv"
+	"math"
 	"time"
 )
 
@@ -114,17 +116,17 @@ func toInterface(cellers []Celler) []interface{} {
 // Assumes you're a good guy and not setting impossible conditions !
 func GenericMutateFloat(childNb int, distance float64, start float64, min float64, max float64) (mutants []float64) {
 	mutants = make([]float64, childNb)
-	//dist := distuv.Normal{
-	//	Mu:    start,
-	//	Sigma: math.Min(distance, max-min),
-	//}
-	//
-	//for i := 0; i < childNb; i++ {
-	//	var rnd float64
-	//	for rnd = dist.Rand(); rnd > max || rnd < min; rnd = dist.Rand() {
-	//	}
-	//	mutants[i] = rnd
-	//}
+	dist := distuv.Normal{
+		Mu:    start,
+		Sigma: math.Min(distance, max-min),
+	}
+
+	for i := 0; i < childNb; i++ {
+		var rnd float64
+		for rnd = dist.Rand(); rnd > max || rnd < min; rnd = dist.Rand() {
+		}
+		mutants[i] = rnd
+	}
 	return mutants
 }
 
@@ -132,18 +134,18 @@ func GenericMutateFloat(childNb int, distance float64, start float64, min float6
 // Assumes you're a good guy and not setting impossible conditions !
 func GenericMutateInt(childNb int, distance float64, start int, min int, max int) (mutants []int) {
 	mutants = make([]int, childNb)
-	//dist := distuv.Normal{
-	//	Mu:    float64(start),
-	//	Sigma: math.Min(distance, float64(max-min)),
-	//}
-	//
-	//getInt := func() int { return int(math.Round(dist.Rand())) }
-	//
-	//for i := 0; i < childNb; i++ {
-	//	var rnd int
-	//	for rnd = getInt(); rnd > max || rnd < min; rnd = getInt() {
-	//	}
-	//	mutants[i] = rnd
-	//}
+	dist := distuv.Normal{
+		Mu:    float64(start),
+		Sigma: math.Min(distance, float64(max-min)),
+	}
+
+	getInt := func() int { return int(math.Round(dist.Rand())) }
+
+	for i := 0; i < childNb; i++ {
+		var rnd int
+		for rnd = getInt(); rnd > max || rnd < min; rnd = getInt() {
+		}
+		mutants[i] = rnd
+	}
 	return mutants
 }
