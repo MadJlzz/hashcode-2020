@@ -9,7 +9,11 @@ import (
 )
 
 // thx to https://stackoverflow.com/questions/37869793/how-do-i-zip-a-directory-containing-sub-directories-or-files-in-golang
-func ZipWriter(baseOutputDir string) {
+func ZipWriter(skipOutput bool, baseOutputDir string) {
+	if skipOutput {
+		return
+	}
+
 	baseFolder, err := os.Getwd()
 	if err != nil {
 		panic(err)

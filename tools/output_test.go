@@ -51,7 +51,7 @@ func TestGetOutputDir(t *testing.T) {
 }
 
 func TestGetTestFiles(t *testing.T) {
-	_ = os.Mkdir("abc", os.ModeDir)
+	_ = os.Mkdir("abc", 0777)
 	f1, _ := os.Create("abc/test1.txt")
 	f2, _ := os.Create("abc/test2.txt")
 	f3, _ := os.Create("abc/test3.txt")

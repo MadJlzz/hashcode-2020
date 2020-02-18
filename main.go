@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	filename   = flag.String("filename", "test/a_example.in", "the data file used for our algorithm")
+	filename   = flag.String("filename", "", "the data file used for our algorithm")
 	algorithm  = flag.String("solver", "", "the solver to use when trying to resolve the problem")
-	skipOutput = flag.Bool("skipOutput", true, "No Output file")
+	skipOutput = flag.Bool("skipOutput", false, "No Output file")
 
 	ResBasePath    = "res"
 	TestDataFolder = "test"
@@ -29,7 +29,7 @@ func main() {
 		for _, testFile := range testFiles {
 			handleFile(testFile, resPath, solver)
 		}
-		tools.ZipWriter(resPath)
+		tools.ZipWriter(*skipOutput, resPath)
 	} else {
 		handleFile(*filename, resPath, solver)
 	}

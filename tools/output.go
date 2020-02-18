@@ -29,7 +29,7 @@ func GetOutputDir(skipOutput bool, resBasePath string) string {
 	}
 
 	if _, err := os.Stat(resBasePath); os.IsNotExist(err) {
-		_ = os.Mkdir(resBasePath, os.ModeDir)
+		_ = os.Mkdir(resBasePath, 0777)
 	}
 
 	files, err := ioutil.ReadDir(resBasePath)
@@ -53,7 +53,7 @@ func GetOutputDir(skipOutput bool, resBasePath string) string {
 	}
 
 	res := fmt.Sprintf("%s/%d", resBasePath, maxVersion+1)
-	_ = os.Mkdir(res, os.ModeDir)
+	_ = os.Mkdir(res, 0777)
 	return res
 }
 
