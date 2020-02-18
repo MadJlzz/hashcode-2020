@@ -57,7 +57,7 @@ func (i *IterativeExecutionTest) Compute() {
 }
 
 func (i *IterativeExecutionTest) IsMax() bool {
-	return math.Abs(i.nb-target) == 0
+	return i.nb == target
 }
 
 func TestIterativeExecution(t *testing.T) {
