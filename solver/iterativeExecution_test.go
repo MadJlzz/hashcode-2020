@@ -7,8 +7,8 @@ import (
 
 var target float64
 
-var nbChild = 500
-var maxChild = 1000
+var nbChild = 10
+var maxChild = 10
 
 type IterativeExecutionTest struct {
 	generation int
@@ -32,7 +32,7 @@ func (o *IterativeExecutionTest) CreateChildren() []interface{} {
 		if !o.CanHaveMoreChild() {
 			break
 		}
-		res[i] = &IterativeExecutionTest{o.generation + 1, 0, o.nb + (o.nb * float64(o.lastChild) / float64(maxChild)), 0, 0}
+		res[i] = &IterativeExecutionTest{o.generation + 1, 0, o.nb + float64(o.lastChild+1)/math.Pow(10, float64(o.generation)), 0, 0}
 		o.lastChild++
 	}
 	return res
@@ -57,12 +57,12 @@ func (i *IterativeExecutionTest) Compute() {
 }
 
 func (i *IterativeExecutionTest) IsMax() bool {
-	return i.nb == target
+	return math.Abs(i.nb-target) == 0
 }
 
 func TestIterativeExecution(t *testing.T) {
 	target = 1.23456789
-	start := IterativeExecutionTest{0, 0, 1, 0, 0}
+	start := IterativeExecutionTest{1, 0, 1, 0, 0}
 	res := IterativeExecution(&start)
 	if res.(*IterativeExecutionTest).nb != target {
 		t.Errorf("error")
