@@ -3,7 +3,7 @@ package exercise
 import (
 	"container/heap"
 	"fmt"
-	"github.com/madjlzz/hashcode-2020/solver"
+	"github.com/MadJlzz/hashcode-2020/solver"
 	"sort"
 	"strconv"
 	"strings"

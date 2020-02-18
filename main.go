@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/madjlzz/hashcode-2020/exercise"
-	"github.com/madjlzz/hashcode-2020/tools"
+	"github.com/MadJlzz/hashcode-2020/exercise"
+	"github.com/MadJlzz/hashcode-2020/tools"
 	"path/filepath"
 )
 
