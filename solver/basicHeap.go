@@ -1,11 +1,11 @@
 package solver
 
 // NEED TO BE IMPLEMENTED WITH POINTER
-// ex: func (s *MyHeap) Compare(heaper BasicHeaper) {...}
+// ex: func (s *MyHeap) IsBetterThan(heaper BasicHeaper) {...}
 type BasicHeaper interface {
 	// if compare like this < heaper -> lowest element popped from heap
 	// if compare like this > heaper -> highest element popped first from heap
-	Compare(heaper BasicHeaper) bool
+	IsBetterThan(heaper interface{}) bool
 
 	// Setter and getter for heap index in order to be able to correctly use
 	// heap.Fix -> mandatory if heap element value is changed
@@ -16,7 +16,7 @@ type BasicHeaper interface {
 type BasicHeap []BasicHeaper
 
 func (h BasicHeap) Len() int           { return len(h) }
-func (h BasicHeap) Less(i, j int) bool { return h[i].Compare(h[j]) }
+func (h BasicHeap) Less(i, j int) bool { return h[i].IsBetterThan(h[j]) }
 func (h BasicHeap) Swap(i, j int) {
 	h[i], h[j] = h[j], h[i]
 	h[i].SetHeapIndex(i)

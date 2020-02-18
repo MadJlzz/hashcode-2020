@@ -1,13 +1,11 @@
 package exercise
 
 import (
-	"container/heap"
 	"fmt"
 	"github.com/MadJlzz/hashcode-2020/solver"
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 )
 
 var max int64
@@ -17,42 +15,14 @@ var sizeMinus1 int
 
 const maxChildrenPerLoop = 100
 
-var solutionsTree solver.BasicHeap
-var bestFinished *Proposition
-
 func SolveExercise(fileContent map[int][]string) (res [][]string) {
-	bestFinished = nil
-	solutionsTree = nil
-
-	start := time.Now()
-
 	data = parseFile(fileContent)
+	start := &Proposition{[]int{}, 0, 0, 0, 0, 1, true}
 
-	quit := solver.WatchHeapOps()
-	channel := make(chan bool)
-	go launchBatch(channel)
-
-	select {
-	case <-channel:
-		fmt.Println("Jackpot: Best solution found !")
-	case <-time.After(100000000 * time.Millisecond):
-		fmt.Println("Timedout...")
-	}
-
-	best := bestFinished
-	if len(solutionsTree) > 0 {
-		bestInTree := heap.Pop(&solutionsTree)
-		if bestInTree != nil && bestInTree.(*Proposition) != nil && (best == nil || bestInTree.(*Proposition).score > best.score) {
-			best = bestInTree.(*Proposition)
-		}
-	}
+	best := solver.IterativeExecution(start).(*Proposition)
 
 	pizzaRes := reorder(best)
 	fmt.Printf("score=%v length=%d res=%v\n", best.score, len(best.pizzas), pizzaRes)
-
-	fmt.Printf("Took %s\n", time.Since(start))
-	quit <- true
-
 	res = append(res, []string{fmt.Sprintf("%d", len(best.pizzas))})
 	res = append(res, make([]string, len(best.pizzas)))
 	for i := 0; i < len(best.pizzas); i++ {
@@ -71,23 +41,6 @@ func reorder(p *Proposition) []int {
 	return res
 }
 
-func launchBatch(channel chan<- bool) {
-	start := &Proposition{[]int{}, 0, 0, 0, 0, 1, true}
-	FinalizeProposition(start)
-
-	var res *Proposition
-	for i := 0; res == nil && len(solutionsTree) > 0; i++ {
-		//fmt.Printf("Best score at turn %d: %v  -- %v\n", i, solutionsTree[0], bestFinished)
-		res = newIteration()
-	}
-	channel <- true
-}
-
-type Res struct {
-	slices []int
-	res    int
-}
-
 type Proposition struct {
 	pizzas      []int
 	lastElement int
@@ -103,59 +56,54 @@ type Proposition struct {
 	canHaveMoreChild bool
 }
 
-func (p *Proposition) Compare(heaper solver.BasicHeaper) bool {
-	return p.score > (heaper.(*Proposition)).score
+func (p *Proposition) IsBetterThan(p2 interface{}) bool {
+	return p2 == nil || p2.(*Proposition) == nil || p.score > (p2.(*Proposition)).score
 }
+func (p *Proposition) IsMax() bool            { return p.score == max }
+func (p *Proposition) CanHaveMoreChild() bool { return p.canHaveMoreChild }
 func (p *Proposition) SetHeapIndex(index int) { p.heapIndex = index }
 func (p *Proposition) GetHeapIndex() int      { return p.heapIndex }
 
 func New(pizzas []int, parentSwapFrom int, baseScore int64) *Proposition {
-	proposition := &Proposition{pizzas, 0, baseScore, 0, parentSwapFrom, pizzas[parentSwapFrom] + 1, true}
-	return proposition
+	Proposition := &Proposition{pizzas, 0, baseScore, 0, parentSwapFrom, pizzas[parentSwapFrom] + 1, true}
+	return Proposition
 }
 
-// Get best proposition from heap, create N children from it by making small modification to its solution
-// Fullfill its children in a batch execution. Stop all if one of the child has the max score
-func newIteration() *Proposition {
-	bestProp := heap.Pop(&solutionsTree).(*Proposition)
-	if bestProp.score == max {
-		bestFinished = bestProp
-		return bestProp
+// Create n children from current Proposition
+func (p *Proposition) CreateChildren() []interface{} {
+	res := make([]interface{}, maxChildrenPerLoop)
+	for i := 0; i < maxChildrenPerLoop; i++ {
+		res[i] = NewChild(p)
 	}
-
-	children := bestProp.createChildren()
-	if bestProp.canHaveMoreChild {
-		heap.Push(&solutionsTree, bestProp)
-	} else if bestFinished == nil || bestProp.score > bestFinished.score {
-		bestFinished = bestProp
-	}
-
-	solver.BatchExecutionBasic(children, FinalizeProposition, 100000000)
-	return nil
+	return res
 }
 
-// Most costly part of the algo and thus put in thread
-// Fill remaining pizzas until max value is reached, and push to heap
-func FinalizeProposition(p interface{}) interface{} {
-	var emptyRes *Proposition
-	proposition := p.(*Proposition)
-	if proposition == nil {
-		return emptyRes
+// Fill with pizzas until it throws up
+func (p *Proposition) Compute() { // -> might be the most costly part of the algo > to be put in separate threads using batchExecution ?
+	var start int
+	if len(p.pizzas) == 0 {
+		start = 0
+	} else {
+		start = p.pizzas[p.lastSwapFrom] + 1
 	}
-	proposition.FullFill()
-	proposition.lastElement = proposition.pizzas[len(proposition.pizzas)-1]
-	channel := solver.HeapPushWithFeedback(&solutionsTree, proposition)
 
-	// below is a hack used to force waiting for the end of the push to release the thread
-	select {
-	case <-channel:
+	for i := start; i < size; i++ {
+		if Contains(p.pizzas, i) {
+			continue
+		}
+		temp := p.score + data[i]
+		if temp > max {
+			continue
+		} else {
+			p.pizzas = append(p.pizzas, i)
+			p.score = temp
+		}
 	}
-	return proposition
 }
 
-// This method is used to generate a new proposition from an existing one
+// This method is used to generate a new Proposition from an existing one
 // As of now it is very basic meaning bad perfs
-// -> given a proposition, a new one will be attempted by switching one of the highest number of parts with the next lowest one
+// -> given a Proposition, a new one will be attempted by switching one of the highest number of parts with the next lowest one
 // -> ex  pizzas possible 10 8 6 3 1 / current set [10 6 3] -> 'replace' pizza 6 by 1 -> new set [10 3 1]
 func NewChild(i interface{}) interface{} {
 	p := i.(*Proposition)
@@ -198,11 +146,6 @@ func NewChild(i interface{}) interface{} {
 	return NewChild(p)
 }
 
-// to get new base score for child, take current, subtract the value of the removed pizza and add the value of the new one
-func (p *Proposition) getNewBaseScore() int64 {
-	return p.score - data[p.pizzas[p.lastSwapFrom]] + data[p.pizzas[p.lastSwapTo]]
-}
-
 // Remove item at index lastSwapFrom and add item at the end with value lastSwapTo
 func swapPizzas(p *Proposition) []int {
 	newPizzas := make([]int, len(p.pizzas))
@@ -210,38 +153,6 @@ func swapPizzas(p *Proposition) []int {
 	copy(newPizzas[p.lastSwapFrom:], p.pizzas[p.lastSwapFrom+1:])
 	newPizzas[len(newPizzas)-1] = p.lastSwapTo
 	return newPizzas
-}
-
-// Create n children from current proposition
-func (p *Proposition) createChildren() []interface{} {
-	res := make([]interface{}, maxChildrenPerLoop)
-	for i := 0; i < maxChildrenPerLoop; i++ {
-		res[i] = NewChild(p)
-	}
-	return res
-}
-
-// Fill with pizzas until it throws up
-func (p *Proposition) FullFill() { // -> might be the most costly part of the algo > to be put in separate threads using batchExecution ?
-	var start int
-	if len(p.pizzas) == 0 {
-		start = 0
-	} else {
-		start = p.pizzas[p.lastSwapFrom] + 1
-	}
-
-	for i := start; i < size; i++ {
-		if Contains(p.pizzas, i) {
-			continue
-		}
-		temp := p.score + data[i]
-		if temp > max {
-			continue
-		} else {
-			p.pizzas = append(p.pizzas, i)
-			p.score = temp
-		}
-	}
 }
 
 func parseFile(fileContent map[int][]string) []int64 {

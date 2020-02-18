@@ -11,7 +11,7 @@ type intHeap struct {
 
 var useLess = true
 
-func (i *intHeap) Compare(heaper BasicHeaper) bool {
+func (i *intHeap) IsBetterThan(heaper interface{}) bool {
 	if useLess {
 		return i.a < heaper.(*intHeap).a
 	} else {

@@ -8,9 +8,11 @@ type threadSafeHeap struct {
 	a, index int
 }
 
-func (i *threadSafeHeap) Compare(heaper BasicHeaper) bool { return i.a < heaper.(*threadSafeHeap).a }
-func (i *threadSafeHeap) SetHeapIndex(index int)          { i.index = index }
-func (i *threadSafeHeap) GetHeapIndex() int               { return i.index }
+func (i *threadSafeHeap) IsBetterThan(heaper interface{}) bool {
+	return i.a < heaper.(*threadSafeHeap).a
+}
+func (i *threadSafeHeap) SetHeapIndex(index int) { i.index = index }
+func (i *threadSafeHeap) GetHeapIndex() int      { return i.index }
 
 var loopNb = 10000
 

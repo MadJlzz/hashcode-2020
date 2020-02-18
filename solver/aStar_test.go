@@ -24,14 +24,14 @@ type testNode struct {
 	neighbours    []Noder
 }
 
-func (t *testNode) GetId() int                          { return t.id }
-func (t *testNode) GetNeighbours() []Noder              { return t.neighbours }
-func (t *testNode) GetDistance(neighbour Noder) float64 { return euclidianDist(t, neighbour) }
-func (t *testNode) SetFScore(score float64)             { t.fScore = score }
-func (t *testNode) GetFScore() float64                  { return t.fScore }
-func (t *testNode) Compare(heaper BasicHeaper) bool     { return t.fScore < heaper.(*testNode).fScore }
-func (t *testNode) SetHeapIndex(index int)              { t.heapIndex = index }
-func (t *testNode) GetHeapIndex() int                   { return t.heapIndex }
+func (t *testNode) GetId() int                           { return t.id }
+func (t *testNode) GetNeighbours() []Noder               { return t.neighbours }
+func (t *testNode) GetDistance(neighbour Noder) float64  { return euclidianDist(t, neighbour) }
+func (t *testNode) SetFScore(score float64)              { t.fScore = score }
+func (t *testNode) GetFScore() float64                   { return t.fScore }
+func (t *testNode) IsBetterThan(heaper interface{}) bool { return t.fScore < heaper.(*testNode).fScore }
+func (t *testNode) SetHeapIndex(index int)               { t.heapIndex = index }
+func (t *testNode) GetHeapIndex() int                    { return t.heapIndex }
 
 func newNode(id int, x, y float64) *testNode {
 	node := &testNode{id: id, x: x, y: y}
