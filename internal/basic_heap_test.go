@@ -86,3 +86,14 @@ func Assert(t *testing.T, want, got interface{}) {
 		t.Errorf("Unexpected result: wanted %v got %v", want, got)
 	}
 }
+
+func AssertArrays(t *testing.T, want, got []interface{}) {
+	if len(want) != len(got) {
+		t.Errorf("Unexpected result: wanted %v got %v", want, got)
+	}
+	for i, v := range want {
+		if v != got[i] {
+			t.Errorf("Unexpected result at index %d: wanted %v got %v", i, v, got[i])
+		}
+	}
+}

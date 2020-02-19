@@ -8,7 +8,7 @@ import (
 var target float64
 
 var nbChild = 10
-var maxChild = 10
+var maxChild = 30
 
 type IterativeExecutionTest struct {
 	generation int

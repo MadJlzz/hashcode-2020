@@ -21,14 +21,13 @@ type IterativeExecutioner interface {
 	// Will stop trying to create children from it if false
 	CanHaveMoreChild() bool
 
-	// Check if instance is better than input
-	IsBetterThan(interface{}) bool
-
 	// Compute the *score* of the element and any other heavy calculations. Only THREAD SAFE operations are allowed here
 	Compute()
 
 	// Define if instance reached the goal
 	IsMax() bool
+
+	internal.BasicHeaper
 }
 
 var solutionsTree internal.BasicHeap
@@ -94,7 +93,7 @@ func newIteration(quit chan<- bool) bool {
 	}
 
 	batchExecution.BatchExecutionBasic(children, iterativeExecutionCompute, ItExLocalTimeout)
-	return true
+	return false
 }
 
 func iterativeExecutionCompute(o interface{}) interface{} {
