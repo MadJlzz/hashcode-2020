@@ -21,6 +21,7 @@ func SolveExercise(fileContent map[int][]string) (res [][]string) {
 	data = nil
 	data = parseFile(fileContent)
 
+	// Mandatory to get the SliceChildren to work
 	internal.SliceChildrenSize = len(data)
 	internal.SliceChildrenCanAdd = func(a *internal.ArrayScored, i int) (bool, float64) {
 		newScore := a.Score + data[i]
@@ -63,9 +64,7 @@ func (p *Proposition) IsMax() bool            { return p.s.Current.Score == max 
 func (p *Proposition) CanHaveMoreChild() bool { return p.s.CanHaveChild }
 func (p *Proposition) SetHeapIndex(index int) { p.heapIndex = index }
 func (p *Proposition) GetHeapIndex() int      { return p.heapIndex }
-func (p *Proposition) Log() {
-	fmt.Printf("%v %v %v\n", p.s.Current.Score, p.s.CanHaveChild, p.s.Current.Data)
-}
+func (p *Proposition) Compute()               { p.s.Complete() }
 
 // Create n children from current Proposition
 func (p *Proposition) CreateChildren() []interface{} {
@@ -79,11 +78,6 @@ func (p *Proposition) CreateChildren() []interface{} {
 	return res
 }
 
-// Fill with pizzas until it throws up
-func (p *Proposition) Compute() { // -> might be the most costly part of the algo > to be put in separate threads using batchExecution ?
-	p.s.Complete()
-}
-
 func parseFile(fileContent map[int][]string) []float64 {
 	size, _ = strconv.Atoi(strings.TrimSpace(fileContent[0][1]))
 	res := make([]float64, size)
@@ -93,13 +87,4 @@ func parseFile(fileContent map[int][]string) []float64 {
 	}
 	max, _ = strconv.ParseFloat(fileContent[0][0], 64)
 	return res
-}
-
-func Contains(a []int, x int) bool {
-	for _, n := range a {
-		if x == n {
-			return true
-		}
-	}
-	return false
 }
