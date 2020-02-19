@@ -2,6 +2,8 @@
 res/
 .DS_Store
 
+go.sum
+
 # Created by https://www.gitignore.io/api/go,intellij+all
 # Edit at https://www.gitignore.io/?templates=go,intellij+all
 
