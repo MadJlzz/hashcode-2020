@@ -69,19 +69,21 @@ func launchBatch(startItem IterativeExecutioner, quit chan<- bool) {
 	startItem.Compute()
 	heap.Push(&solutionsTree, startItem)
 
-	for i := 0; len(solutionsTree) > 0; i++ {
-		newIteration(quit)
+	exit := false
+	for i := 0; len(solutionsTree) > 0 && !exit; i++ {
+		exit = newIteration(quit)
 	}
 	quit <- true
 }
 
 // Get best proposition from heap, create N children from it by making small modification to its solution
 // Fullfill its children in a batch execution. Stop all if one of the child has the max score
-func newIteration(quit chan<- bool) {
+func newIteration(quit chan<- bool) bool {
 	bestProp := heap.Pop(&solutionsTree).(IterativeExecutioner)
 	if bestProp.IsMax() {
 		bestFinished = bestProp
 		quit <- true
+		return true
 	}
 
 	children := bestProp.CreateChildren()
@@ -92,6 +94,7 @@ func newIteration(quit chan<- bool) {
 	}
 
 	batchExecution.BatchExecutionBasic(children, iterativeExecutionCompute, ItExLocalTimeout)
+	return true
 }
 
 func iterativeExecutionCompute(o interface{}) interface{} {
