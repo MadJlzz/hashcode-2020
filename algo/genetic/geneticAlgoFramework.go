@@ -1,7 +1,8 @@
-package solver
+package genetic
 
 import (
 	"fmt"
+	"github.com/MadJlzz/hashcode-2020/algo/batchExecution"
 	"gonum.org/v1/gonum/stat/distuv"
 	"math"
 	"time"
@@ -84,16 +85,16 @@ func increaseDistances(oldDistances []float64) (res []float64) {
 }
 
 func geneticAlgoExecutions(channel chan<- Celler, cellers []Celler, execute func(Celler) Celler, timeout time.Duration) {
-	batchFunc := func(cellI interface{}) ExecutionRes {
+	batchFunc := func(cellI interface{}) batchExecution.ExecutionRes {
 		cell := cellI.(Celler)
 		res := execute(cell)
 		if res == nil {
-			return ExecutionRes{nil, fmt.Errorf("no result for cell %v", cell)}
+			return batchExecution.ExecutionRes{nil, fmt.Errorf("no result for cell %v", cell)}
 		}
-		return ExecutionRes{res, nil}
+		return batchExecution.ExecutionRes{res, nil}
 	}
 
-	res := BatchExecution(toInterface(cellers), batchFunc, timeout/4)
+	res := batchExecution.BatchExecution(toInterface(cellers), batchFunc, timeout/4)
 	var bestRes Celler
 	for _, v := range res {
 		temp := v.Res.(Celler)

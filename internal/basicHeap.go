@@ -1,4 +1,4 @@
-package solver
+package internal
 
 // NEED TO BE IMPLEMENTED WITH POINTER
 // ex: func (s *MyHeap) IsBetterThan(heaper BasicHeaper) {...}

@@ -1,8 +1,10 @@
-package solver
+package iterativeExecution
 
 import (
 	"container/heap"
 	"fmt"
+	"github.com/MadJlzz/hashcode-2020/algo/batchExecution"
+	"github.com/MadJlzz/hashcode-2020/internal"
 	"reflect"
 	"time"
 )
@@ -29,7 +31,7 @@ type IterativeExecutioner interface {
 	IsMax() bool
 }
 
-var solutionsTree BasicHeap
+var solutionsTree internal.BasicHeap
 var bestFinished IterativeExecutioner
 
 func IterativeExecution(startItem IterativeExecutioner) IterativeExecutioner {
@@ -38,7 +40,7 @@ func IterativeExecution(startItem IterativeExecutioner) IterativeExecutioner {
 
 	start := time.Now()
 
-	quit := WatchHeapOps()
+	quit := internal.WatchHeapOps()
 	channel := make(chan bool)
 	go launchBatch(startItem, channel)
 
@@ -89,7 +91,7 @@ func newIteration(quit chan<- bool) {
 		bestFinished = bestProp
 	}
 
-	BatchExecutionBasic(children, iterativeExecutionCompute, ItExLocalTimeout)
+	batchExecution.BatchExecutionBasic(children, iterativeExecutionCompute, ItExLocalTimeout)
 }
 
 func iterativeExecutionCompute(o interface{}) interface{} {
@@ -100,11 +102,9 @@ func iterativeExecutionCompute(o interface{}) interface{} {
 	object := o.(IterativeExecutioner)
 
 	object.Compute()
-	channel := HeapPushWithFeedback(&solutionsTree, object)
+	channel := internal.HeapPushWithFeedback(&solutionsTree, object)
 
 	// below is a hack used to force waiting for the end of the push to release the thread
-	select {
-	case <-channel:
-	}
+	<-channel
 	return object
 }

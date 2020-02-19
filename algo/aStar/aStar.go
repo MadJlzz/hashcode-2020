@@ -1,8 +1,9 @@
-package solver
+package aStar
 
 import (
 	"container/heap"
 	"fmt"
+	"github.com/MadJlzz/hashcode-2020/internal"
 	"math"
 )
 
@@ -15,7 +16,7 @@ type Noder interface {
 	SetFScore(score float64)
 	GetFScore() float64
 
-	BasicHeaper
+	internal.BasicHeaper
 }
 
 // 'Expected' distance calculation method between 2 distant points
@@ -54,7 +55,7 @@ func AStar(start Noder, goal Noder, distance HeuristicDistance, staticWeight flo
 
 	// Use of a heap to efficiently retrieve the item with the lowest score
 	// NEED NODER.COMPARE TO BE LIKE this < A
-	openSetHeap := &BasicHeap{start}
+	openSetHeap := &internal.BasicHeap{start}
 	heap.Init(openSetHeap)
 
 	cameFrom := make(map[int]Noder)

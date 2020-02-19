@@ -1,4 +1,4 @@
-package solver
+package internal
 
 import (
 	"testing"

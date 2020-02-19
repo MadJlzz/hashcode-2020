@@ -1,7 +1,8 @@
-package solver
+package aStar
 
 import (
 	"fmt"
+	"github.com/MadJlzz/hashcode-2020/tools"
 	"math"
 	"testing"
 )
@@ -52,9 +53,9 @@ func TestAStar_0(t *testing.T) {
 	n1_1.neighbours = []Noder{n1_2, n2_1, n2_2}
 
 	res, err := AStar(n1_1, n1_1, euclidianDist, 1.0)
-	Assert(t, nil, err)
-	Assert(t, 1, len(res))
-	Assert(t, 11, res[0].GetId())
+	tools.UnittestAssert(t, nil, err)
+	tools.UnittestAssert(t, 1, len(res))
+	tools.UnittestAssert(t, 11, res[0].GetId())
 }
 
 /*
@@ -84,11 +85,11 @@ func TestAStar_1(t *testing.T) {
 	n3_3.neighbours = []Noder{n3_2, n2_3, n2_2}
 
 	res, err := AStar(n1_1, n3_3, euclidianDist, 1.0)
-	Assert(t, nil, err)
-	Assert(t, 3, len(res))
-	Assert(t, 11, res[0].GetId())
-	Assert(t, 22, res[1].GetId())
-	Assert(t, 33, res[2].GetId())
+	tools.UnittestAssert(t, nil, err)
+	tools.UnittestAssert(t, 3, len(res))
+	tools.UnittestAssert(t, 11, res[0].GetId())
+	tools.UnittestAssert(t, 22, res[1].GetId())
+	tools.UnittestAssert(t, 33, res[2].GetId())
 }
 
 /*
@@ -112,12 +113,12 @@ func TestAStar_2(t *testing.T) {
 	n3_3.neighbours = []Noder{n3_2, n2_3}
 
 	res, err := AStar(n1_1, n3_3, euclidianDist, 1.0)
-	Assert(t, nil, err)
-	Assert(t, 4, len(res))
-	Assert(t, 11, res[0].GetId())
-	Assert(t, 22, res[1].GetId())
-	Assert(t, 23, res[2].GetId())
-	Assert(t, 33, res[3].GetId())
+	tools.UnittestAssert(t, nil, err)
+	tools.UnittestAssert(t, 4, len(res))
+	tools.UnittestAssert(t, 11, res[0].GetId())
+	tools.UnittestAssert(t, 22, res[1].GetId())
+	tools.UnittestAssert(t, 23, res[2].GetId())
+	tools.UnittestAssert(t, 33, res[3].GetId())
 }
 
 /*
@@ -141,13 +142,13 @@ func TestAStar_3(t *testing.T) {
 	n3_3.neighbours = []Noder{n3_2, n2_3}
 
 	res, err := AStar(n1_1, n3_3, euclidianDist, 1.0)
-	Assert(t, nil, err)
-	Assert(t, 5, len(res))
-	Assert(t, 11, res[0].GetId())
-	Assert(t, 12, res[1].GetId())
-	Assert(t, 13, res[2].GetId())
-	Assert(t, 23, res[3].GetId())
-	Assert(t, 33, res[4].GetId())
+	tools.UnittestAssert(t, nil, err)
+	tools.UnittestAssert(t, 5, len(res))
+	tools.UnittestAssert(t, 11, res[0].GetId())
+	tools.UnittestAssert(t, 12, res[1].GetId())
+	tools.UnittestAssert(t, 13, res[2].GetId())
+	tools.UnittestAssert(t, 23, res[3].GetId())
+	tools.UnittestAssert(t, 33, res[4].GetId())
 }
 
 /* o o g | o y g | oxo g | o oxo
@@ -170,6 +171,6 @@ func TestAStar_4(t *testing.T) {
 	n3_3.neighbours = []Noder{}
 
 	res, err := AStar(n1_1, n3_3, euclidianDist, 1.0)
-	Assert(t, "could not reach the goal", fmt.Sprintf("%v", err))
-	Assert(t, 0, len(res))
+	tools.UnittestAssert(t, "could not reach the goal", fmt.Sprintf("%v", err))
+	tools.UnittestAssert(t, 0, len(res))
 }

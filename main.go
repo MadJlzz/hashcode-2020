@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/MadJlzz/hashcode-2020/exercise"
-	"github.com/MadJlzz/hashcode-2020/tools"
+	"github.com/MadJlzz/hashcode-2020/tools/io"
 	"path/filepath"
 )
 
@@ -22,14 +22,14 @@ var solver = exercise.SolveExercise
 
 func main() {
 	flag.Parse()
-	resPath := tools.GetOutputDir(*skipOutput, ResBasePath)
+	resPath := io.GetOutputDir(*skipOutput, ResBasePath)
 
 	if *filename == "" {
-		testFiles := tools.GetTestFiles(TestDataFolder)
+		testFiles := io.GetTestFiles(TestDataFolder)
 		for _, testFile := range testFiles {
 			handleFile(testFile, resPath, solver)
 		}
-		tools.ZipWriter(*skipOutput, resPath)
+		io.ZipWriter(*skipOutput, resPath)
 	} else {
 		handleFile(*filename, resPath, solver)
 	}
@@ -37,7 +37,7 @@ func main() {
 
 func handleFile(filename string, resPath string, mySolver func(map[int][]string) [][]string) {
 	fmt.Printf("*************\nTesting file: %s\n", filename)
-	fileContent := tools.ReadInput(filename)
+	fileContent := io.ReadInput(filename)
 
 	res := mySolver(fileContent)
 
@@ -45,7 +45,7 @@ func handleFile(filename string, resPath string, mySolver func(map[int][]string)
 		fmt.Printf("Result: \n%s\n*************\n", res)
 	} else {
 		fileOutput := fmt.Sprintf("%s/%s", resPath, filepath.Base(filename))
-		tools.DumpStringListToFile(fileOutput, &res)
+		io.DumpStringListToFile(fileOutput, &res)
 		fmt.Printf("Result in file: %s\n*************\n", fileOutput)
 	}
 }

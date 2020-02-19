@@ -2,7 +2,7 @@ package exercise
 
 import (
 	"fmt"
-	"github.com/MadJlzz/hashcode-2020/solver"
+	"github.com/MadJlzz/hashcode-2020/algo/iterativeExecution"
 	"sort"
 	"strconv"
 	"strings"
@@ -16,10 +16,12 @@ var sizeMinus1 int
 const maxChildrenPerLoop = 100
 
 func SolveExercise(fileContent map[int][]string) (res [][]string) {
+	data = nil
 	data = parseFile(fileContent)
+
 	start := &Proposition{[]int{}, 0, 0, 0, 0, 1, true}
 
-	best := solver.IterativeExecution(start).(*Proposition)
+	best := iterativeExecution.IterativeExecution(start).(*Proposition)
 
 	pizzaRes := reorder(best)
 	fmt.Printf("score=%v length=%d res=%v\n", best.score, len(best.pizzas), pizzaRes)
@@ -90,6 +92,10 @@ func (p *Proposition) Compute() { // -> might be the most costly part of the alg
 	for i := start; i < size; i++ {
 		if Contains(p.pizzas, i) {
 			continue
+		}
+
+		if i >= len(data) {
+			println(i, len(data), size)
 		}
 		temp := p.score + data[i]
 		if temp > max {
@@ -163,7 +169,6 @@ func parseFile(fileContent map[int][]string) []int64 {
 		res[i], _ = strconv.ParseInt(strings.TrimSpace(fileContent[1][sizeMinus1-i]), 10, 64)
 	}
 	max, _ = strconv.ParseInt(fileContent[0][0], 10, 64)
-
 	return res
 }
 

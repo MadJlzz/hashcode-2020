@@ -1,4 +1,4 @@
-package solver
+package internal
 
 import "container/heap"
 
