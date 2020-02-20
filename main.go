@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/MadJlzz/hashcode-2020/exercise2"
+	"github.com/MadJlzz/hashcode-2020/realAttempt"
 	"github.com/MadJlzz/hashcode-2020/tools/io"
 	"path/filepath"
 )
@@ -18,7 +18,7 @@ var (
 )
 
 // Define your solver here
-var solver = exercise2.SolveExercise
+var solver = realAttempt.SolveExercise
 
 func main() {
 	flag.Parse()

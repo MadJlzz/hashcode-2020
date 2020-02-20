@@ -27,6 +27,7 @@ func ReadInput(filename string) map[int][]string {
 		if err == io.EOF {
 			break
 		}
+		l = strings.ReplaceAll(l, "\n", "")
 		res[i] = strings.Split(l, InputDelimiter)
 	}
 
