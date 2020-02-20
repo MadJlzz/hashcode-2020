@@ -4,12 +4,12 @@ import "strconv"
 
 var Days int
 var Libraries []Library
-var Books []int
+var Books []*Book
 
 type Library struct {
 	SignupTime         int
 	ParallelProcessing int
-	BooksIndex         []int
+	Books              []*Book
 
 	// Books that we want to output for the current library
 	BooksOutput []int
@@ -18,24 +18,34 @@ type Library struct {
 	StartDate int
 }
 
+type Book struct {
+	Index int
+	Score int
+	Taken bool
+}
+
 func NewLibrary(fileContent map[int][]string) {
 
-	Books = make([]int, toInt(fileContent[0][0]))
+	Books = make([]*Book, toInt(fileContent[0][0]))
 	Libraries = make([]Library, toInt(fileContent[0][1]))
 	Days = toInt(fileContent[0][2])
 
 	for index, score := range fileContent[1] {
-		Books[index] = toInt(score)
+		Books[index] = &Book{
+			Index: index,
+			Score: toInt(score),
+			Taken: false,
+		}
 	}
 
 	for i := 2; i < len(fileContent); i += 2 {
 		currentLibrary := Library{
-			BooksIndex:         make([]int, toInt(fileContent[i][0])),
+			Books:              make([]*Book, toInt(fileContent[i][0])),
 			SignupTime:         toInt(fileContent[i][1]),
 			ParallelProcessing: toInt(fileContent[i][2]),
 		}
 		for k, v := range fileContent[i+1] {
-			currentLibrary.BooksIndex[k] = toInt(v)
+			currentLibrary.Books[k] = Books[toInt(v)]
 		}
 		Libraries[i/2-1] = currentLibrary
 	}
