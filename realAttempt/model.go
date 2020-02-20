@@ -3,7 +3,7 @@ package realAttempt
 import "strconv"
 
 var Days int
-var Libraries []Library
+var Libraries []*Library
 var Books []*Book
 
 type Library struct {
@@ -12,7 +12,7 @@ type Library struct {
 	Books              []*Book
 
 	// Books that we want to output for the current library
-	BooksOutput []int
+	BooksOutput []*Book
 
 	Score     int
 	StartDate int
@@ -27,7 +27,7 @@ type Book struct {
 func NewLibrary(fileContent map[int][]string) {
 
 	Books = make([]*Book, toInt(fileContent[0][0]))
-	Libraries = make([]Library, toInt(fileContent[0][1]))
+	Libraries = make([]*Library, toInt(fileContent[0][1]))
 	Days = toInt(fileContent[0][2])
 
 	for index, score := range fileContent[1] {
@@ -39,7 +39,7 @@ func NewLibrary(fileContent map[int][]string) {
 	}
 
 	for i := 2; i < len(fileContent); i += 2 {
-		currentLibrary := Library{
+		currentLibrary := &Library{
 			Books:              make([]*Book, toInt(fileContent[i][0])),
 			SignupTime:         toInt(fileContent[i][1]),
 			ParallelProcessing: toInt(fileContent[i][2]),
