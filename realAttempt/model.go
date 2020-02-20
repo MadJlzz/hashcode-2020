@@ -11,6 +11,9 @@ type Library struct {
 	ParallelProcessing int
 	BooksIndex         []int
 
+	// Books that we want to output for the current library
+	BooksOutput []int
+
 	Score     int
 	StartDate int
 }
