@@ -7,6 +7,7 @@ var Libraries []*Library
 var Books []*Book
 
 type Library struct {
+	Index              int
 	SignupTime         int
 	ParallelProcessing int
 	Books              []*Book
@@ -39,15 +40,20 @@ func NewLibrary(fileContent map[int][]string) {
 	}
 
 	for i := 2; i < len(fileContent); i += 2 {
+		if fileContent[i][0] == "" {
+			continue
+		}
+		idx := i/2 - 1
 		currentLibrary := &Library{
 			Books:              make([]*Book, toInt(fileContent[i][0])),
+			Index:              idx,
 			SignupTime:         toInt(fileContent[i][1]),
 			ParallelProcessing: toInt(fileContent[i][2]),
 		}
 		for k, v := range fileContent[i+1] {
 			currentLibrary.Books[k] = Books[toInt(v)]
 		}
-		Libraries[i/2-1] = currentLibrary
+		Libraries[idx] = currentLibrary
 	}
 
 }

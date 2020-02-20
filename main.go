@@ -11,7 +11,7 @@ import (
 var (
 	filename   = flag.String("filename", "", "the data file used for our algorithm")
 	algorithm  = flag.String("solver", "", "the solver to use when trying to resolve the problem")
-	skipOutput = flag.Bool("skipOutput", true, "No Output file")
+	skipOutput = flag.Bool("skipOutput", false, "No Output file")
 
 	ResBasePath    = "realRes"
 	TestDataFolder = "realTest"

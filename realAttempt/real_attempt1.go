@@ -10,5 +10,8 @@ func SolveExercise(fileContent map[int][]string) (res [][]string) {
 	fmt.Println(Days)
 	fmt.Println(Books)
 
-	return nil
+	for _, l := range Libraries {
+		l.BooksOutput = l.Books
+	}
+	return DumpRes(Libraries)
 }
