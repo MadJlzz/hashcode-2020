@@ -13,8 +13,8 @@ var (
 	algorithm  = flag.String("solver", "", "the solver to use when trying to resolve the problem")
 	skipOutput = flag.Bool("skipOutput", true, "No Output file")
 
-	ResBasePath    = "res"
-	TestDataFolder = "test"
+	ResBasePath    = "realRes"
+	TestDataFolder = "realTest"
 )
 
 // Define your solver here

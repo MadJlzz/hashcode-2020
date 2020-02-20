@@ -1,5 +1,5 @@
 #
-res/
+realRes/
 .DS_Store
 
 go.sum
