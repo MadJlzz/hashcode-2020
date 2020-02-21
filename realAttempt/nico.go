@@ -26,7 +26,6 @@ func (l *Library) Scoring() {
 	l.Score = l.ParallelProcessing * len(l.Books) / l.SignupTime
 }
 
-
 type HandleLibs func([]*Library) []*Library
 
 func BasicSolve(solve func([]*Library) []*Library) [][]string {
@@ -44,7 +43,7 @@ func BasicSolve(solve func([]*Library) []*Library) [][]string {
 
 // SignupTime
 func basicSignupTime(l []*Library) []*Library {
-	sort.Slice(l, func( i, j int) bool {
+	sort.Slice(l, func(i, j int) bool {
 		if l[i].SignupTime == l[j].SignupTime {
 			return l[i].ParallelProcessing < l[j].ParallelProcessing
 		}
@@ -62,29 +61,22 @@ func basicScore(l []*Library) []*Library {
 		}
 		l.Score = score * l.ParallelProcessing / l.SignupTime
 	}
-	sort.Slice(l, func( i, j int) bool {
+	sort.Slice(l, func(i, j int) bool {
 		return l[i].Score > l[j].Score
 	})
 	return l
 }
 
-
-
 func ScoreSolve() [][]string {
-	ArrayScored.
-
-
 	maxCount := 1000
 
 	fmt.Printf("Start Solve%v\n", len(Libraries))
 	var batch [][]*Library
 
-
-
 	fmt.Printf("Permut %v\n", len(batch))
 	score := 0
 	var dump [][]string
-	for i := 0 ; i < maxCount && i < len(batch); i++ {
+	for i := 0; i < maxCount && i < len(batch); i++ {
 		lib, tempScore := CalculateScore(batch[i])
 		if tempScore > score {
 			score = tempScore
@@ -95,7 +87,6 @@ func ScoreSolve() [][]string {
 	fmt.Printf("End Solve %v\n", score)
 	return dump
 }
-
 
 // Perm calls f with each permutation of a.
 func Perm(a []*Library, f func([]*Library)) {
@@ -115,19 +106,6 @@ func perm(a []*Library, f func([]*Library), i int) {
 		a[i], a[j] = a[j], a[i]
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Thx to https://stackoverflow.com/questions/30226438/generate-all-permutations-in-go !
 func Permutations(arr []*Library) [][]*Library {
