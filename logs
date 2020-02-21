@@ -1,0 +1,48 @@
+*************
+Testing file: realTest/a_example.txt
+Attempt basicScore1 score 21
+Attempt basicScore2 score 21
+Attempt basicScore3 score 21
+Attempt basicScore4 score 21
+Best score: 21 with basicScore1Result in file: realRes/1/a_example.txt
+*************
+*************
+Testing file: realTest/b_read_on.txt
+Attempt basicScore1 score 5822900
+Attempt basicScore2 score 5822900
+Attempt basicScore3 score 5822900
+Attempt basicScore4 score 5822900
+Best score: 5822900 with basicScore1Result in file: realRes/1/b_read_on.txt
+*************
+*************
+Testing file: realTest/c_incunabula.txt
+Attempt basicScore1 score 5326250
+Attempt basicScore2 score 5371512
+Attempt basicScore3 score 5273614
+Attempt basicScore4 score 5635991
+Best score: 5635991 with basicScore4Result in file: realRes/1/c_incunabula.txt
+*************
+*************
+Testing file: realTest/d_tough_choices.txt
+Attempt basicScore1 score 5028660
+Attempt basicScore2 score 5029830
+Attempt basicScore3 score 5031065
+Attempt basicScore4 score 5031975
+Best score: 5031975 with basicScore4Result in file: realRes/1/d_tough_choices.txt
+*************
+*************
+Testing file: realTest/e_so_many_books.txt
+Attempt basicScore1 score 5086455
+Attempt basicScore2 score 4915343
+Attempt basicScore3 score 4920883
+Attempt basicScore4 score 4658747
+Best score: 5086455 with basicScore1Result in file: realRes/1/e_so_many_books.txt
+*************
+*************
+Testing file: realTest/f_libraries_of_the_world.txt
+Attempt basicScore1 score 5068631
+Attempt basicScore2 score 5070640
+Attempt basicScore3 score 5053436
+Attempt basicScore4 score 5240161
+Best score: 5240161 with basicScore4Result in file: realRes/1/f_libraries_of_the_world.txt
+*************

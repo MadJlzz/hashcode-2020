@@ -8,17 +8,22 @@ import (
 
 func DumpRes(libs []*Library) [][]string {
 	s := func(i int) string { return strconv.Itoa(i) }
-	res := make([][]string, len(libs)*2+1)
-	res[0] = []string{s(len(libs))}
-
-	for k, v := range libs {
-		res[k*2+1] = []string{s(v.Index), s(len(v.BooksOutput))}
+	var res [][]string
+	res = append(res, []string{s(len(libs))})
+	k := 0
+	for _, v := range libs {
+		if len(v.BooksOutput) == 0 {
+			continue
+		}
+		k++
+		res = append(res, []string{s(v.Index), s(len(v.BooksOutput))})
 		temp := make([]string, len(v.BooksOutput))
 		for k2, v2 := range v.BooksOutput {
 			temp[k2] = s(v2.Index)
 		}
-		res[k*2+2] = temp
+		res = append(res, temp)
 	}
+	res[0] = []string{s(k)}
 	return res
 }
 
@@ -52,21 +57,6 @@ func basicSignupTime(l []*Library) []*Library {
 	return l
 }
 
-// parrallel * scoreBooks / signupTime
-func basicScore(l []*Library) []*Library {
-	for _, l := range Libraries {
-		score := 0
-		for _, b := range l.Books {
-			score += b.Score
-		}
-		l.Score = score * l.ParallelProcessing / l.SignupTime
-	}
-	sort.Slice(l, func(i, j int) bool {
-		return l[i].Score > l[j].Score
-	})
-	return l
-}
-
 func ScoreSolve() [][]string {
 	maxCount := 1000
 
@@ -77,7 +67,7 @@ func ScoreSolve() [][]string {
 	score := 0
 	var dump [][]string
 	for i := 0; i < maxCount && i < len(batch); i++ {
-		lib, tempScore := CalculateScore(batch[i])
+		lib, tempScore := CalculateScore(batch[i], Scoring1)
 		if tempScore > score {
 			score = tempScore
 			dump = DumpRes(lib)

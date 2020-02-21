@@ -84,27 +84,35 @@ func (l *Library) Compute() bool {
 	return len(l.BooksOutput) > 0
 }
 
-func Reinit(libraries []*Library) {
-	for _, l := range libraries {
+func Reinit() {
+	for _, l := range Libraries {
 		l.SignupTimeTemp = l.SignupTime
 		l.BooksOutput = nil
+		l.Score = 0
+		l.StartDate = 0
+	}
+	for _, b := range Books {
+		b.Taken = false
 	}
 }
 
-func CalculateScore(libraries []*Library) ([]*Library, int) {
+func CalculateScore(libraries []*Library, attempt func(bookScore int, l *Library) int) ([]*Library, int) {
+	var temp = libraries
 	var res []*Library
 	var lastLib *Library
-	lastLibCurrent := 0
+
+	basicScore(temp, attempt)
 
 	score := 0
 	for i := 0; i < Days; i++ {
 		if lastLib != nil && lastLib.SignupTimeTemp == 0 {
-			lastLibCurrent++
 			res = append(res, lastLib)
 			lastLib = nil
 		}
-		if lastLib == nil && lastLibCurrent < len(libraries) {
-			lastLib = libraries[lastLibCurrent]
+		if lastLib == nil && 0 < len(temp) {
+			lastLib = temp[0]
+			temp = temp[1:]
+			basicScore(temp, attempt)
 		}
 		if lastLib != nil {
 			lastLib.SignupTimeTemp--
@@ -126,4 +134,21 @@ func CalculateScore(libraries []*Library) ([]*Library, int) {
 		}
 	}
 	return res, score
+}
+
+// parrallel * scoreBooks / signupTime
+func basicScore(l []*Library, scoring func(bookScore int, l *Library) int) []*Library {
+	for _, l := range Libraries {
+		score := 0
+		for _, b := range l.Books {
+			if !b.Taken {
+				score += b.Score
+			}
+		}
+		l.Score = scoring(score, l)
+	}
+	sort.Slice(l, func(i, j int) bool {
+		return l[i].Score > l[j].Score
+	})
+	return l
 }
